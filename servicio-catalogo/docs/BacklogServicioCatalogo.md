@@ -15,8 +15,9 @@
 - Un PR no se mergea si el sistema queda en un estado a medio implementar — el caso de uso tiene que funcionar de punta a punta (aunque sea con lo mínimo) antes de cerrar el issue.
 - DoD por issue, salvo que diga lo contrario:
   - [ ] Todos los ítems del checklist interno resueltos
-  - [ ] Código en la capa correcta según `docs/arquitecturaHexagonalServicioCatalogo`
+  - [ ] Código en la capa correcta según `docs/arquitecturaHexagonalServicioCatalogo.md`
   - [ ] Al menos un test que cubra el caso de uso
+  - [ ] `./mvnw test` en verde (incluye `ArchitectureTest`, que no se puede esquivar)
   - [ ] Sin secretos ni credenciales hardcodeadas
   - [ ] docs/ actualizado si el issue cambia un contrato externo
 
@@ -27,7 +28,7 @@
 No son casos de uso funcionales, son la plomería previa — cada uno ya es un commit natural propio (`chore:`).
 
 ### #1 chore: setup del proyecto + esqueleto hexagonal `[chore]`
-Proyecto Spring Boot inicial + carpetas `domain/`, `adapter/`, `config/` vacías, con un test de arquitectura (ArchUnit) que falle si `domain` importa de `adapter` o de Spring/JPA.
+Proyecto Spring Boot inicial + estructura de capas según `docs/arquitecturaHexagonalServicioCatalogo`: `catalog/{domain,application,infrastructure}` y `config/`, vacías. Las siete reglas de dependencia van en `ArchitectureRules`/`ArchitectureTest` (ArchUnit), y `ArchitectureRulesFixtureTest` comprueba con clases de prueba que cada regla detecta una violación real — si no, el test verde no probaría nada. No requiere ninguna clase de dominio: la guarda se verifica con fixtures.
 
 ### #2 chore: Docker Compose local `[chore]`
 PostgreSQL propio + variables de entorno externalizadas (`application.yml` con placeholders, `.env.example`).

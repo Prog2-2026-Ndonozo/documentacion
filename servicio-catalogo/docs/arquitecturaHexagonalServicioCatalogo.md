@@ -37,6 +37,7 @@ servicio-catalogo/
     ├── ServicioCatalogoSincronizacionApplication.java
     ├── catalog/
     │   ├── domain/                              ← PURO: sin Spring, sin JPA, sin Jakarta
+    │   │   ├── exception/                       ← error de validación del modelo (ADR-0016)
     │   │   ├── model/
     │   │   │   ├── Professional.java
     │   │   │   ├── ProfessionalCategory.java
