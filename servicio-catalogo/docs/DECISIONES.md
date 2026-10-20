@@ -18,6 +18,8 @@ servicios (issue #10); los ADR del modelo de dominio usan el rango `0010+`. Cada
 | Validaciones del modelo | Nombres no vacíos; `startTime < endTime`; rango múltiplo de la duración; versión ≥ 0 (0 = inicial) | `adr/0014-validaciones-del-modelo.md` |
 | Modelo inmutable que se valida al construirse | Clases Lombok sin setters ni constructor vacío, con builder; **desvío de la regla 2 del skill** | `adr/0015-modelo-inmutable-con-validacion.md` |
 | Excepción de validación del modelo en `domain/` | Tipo propio, lanzado por el modelo; **desvío de la regla 1 de excepciones del skill** | `adr/0016-excepcion-de-validacion-del-dominio.md` |
+| Flyway para las migraciones | SQL plano en `db/migration`; Hibernate en `ddl-auto: validate` | `adr/0017-flyway-para-migraciones-de-bd.md` |
+| Claves foráneas diferidas y reglas de esquema | FK `DEFERRABLE INITIALLY DEFERRED`; versión local en la misma base; ID de la cátedra como PK; índices en las FK | `adr/0018-claves-foraneas-diferidas.md` |
 
 ## Pendientes
 
@@ -28,6 +30,7 @@ servicios (issue #10); los ADR del modelo de dominio usan el rango `0010+`. Cada
 | Quién consume la búsqueda: ¿KMP directo + turnos, o solo turnos? | #9 | Si solo turnos, se elimina la fila de KMP de la tabla de puertos de entrada |
 | Dónde viven registro/login del usuario final (E §3.2) | — | E no asigna el servicio; `reunion.md` lo ubica en catálogo. No está en el backlog |
 | Propagación de identidad entre servicios (JWT usuario vs técnico) | #10 | `ADR-0002` aún no escrito (E §9) |
+| Estrategia transaccional de la sincronización (granularidad, reintentos, dato inválido) | #5, #6 | Principio fijado en ADR-0018: la unidad de trabajo es una versión completa en una transacción |
 | `SyncDiagnosticsPort`: tabla propia o sobre `CatalogRepositoryPort` | #7, #12 | Depende de la máquina de estados de sync |
 | Qué hacer si la cátedra publica un dato que viola una validación del dominio | #5, #6 | Cancelar toda la sync o saltear el registro (ADR-0014) |
 | Significado de "nombre" en el filtro de búsqueda; efecto de una categoría deshabilitada sobre sus profesionales | #9 | Huecos de E §4.1 (ADR-0010) |
