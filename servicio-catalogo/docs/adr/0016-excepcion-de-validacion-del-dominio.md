@@ -40,8 +40,8 @@ caso de uso decida cómo tratar un dato inválido de la cátedra.
 - Hay que agregar la carpeta `domain/exception/` a la estructura de paquetes de
   `arquitecturaHexagonalServicioCatalogo.md`. La regla `MODULO_SOLO_TIENE_TRES_CAPAS` no se ve afectada: la
   carpeta está dentro de `domain/`.
-- Qué hace el caso de uso al capturarla (cancelar la sincronización o saltear el registro) sigue abierto
-  (ADR-0014, issues #5 y #6).
+- Se asume que la cátedra publica datos válidos (ADR-0014): el caso de uso no la captura ni la trata de forma
+  especial. Si llegara a lanzarse, la transacción de la sincronización se revierte y la versión local no avanza.
 - La traducción a código HTTP, si algún día corresponde, la hace el controller (`@RestControllerAdvice`), no
   esta clase.
 - Los tests unitarios del modelo (issue #3) verifican que se lance esta excepción por cada regla.

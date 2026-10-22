@@ -40,12 +40,14 @@ inicial, el chequeo contra `oldestAvailableVersion` (I §14.2) dispara el snapsh
 "base vacía" (E §6.1).
 
 ## Consecuencias
-- **Más estricto que el contrato.** Si la cátedra publica un dato que viole alguna regla, el dominio lo rechaza.
-  Qué hacer en ese caso (cancelar toda la sincronización o saltear el registro) queda **abierto** para los issues
-  #5 y #6.
-- Si la cátedra omite alguno de los datos obligatorios, el dominio lo rechaza, con la misma consecuencia abierta
-  de arriba.
+- **Más estricto que el contrato.** Si la cátedra publica un dato que viole alguna regla, o que omita un dato
+  obligatorio, el dominio lo rechaza. **Decisión (conversada con el profesor):** se asume que la cátedra publica
+  datos válidos y no se diseña un manejo especial para el caso contrario. Si llegara uno inválido, el modelo lanza
+  `InvalidCatalogDataException`, la transacción de la sincronización se revierte y la versión local no avanza (es
+  el comportamiento por defecto, sin código adicional). Las validaciones del modelo se mantienen como red de
+  seguridad.
 - Un horario que cruza la medianoche (por ejemplo 22:00 a 02:00) es inválido.
 - Un `startTime`/`endTime` con segundos que no den un rango en minutos exactos no cumple la regla del múltiplo.
-- Supuesto a confirmar con la cátedra: la versión `0` no se publica como versión real del catálogo.
+- Supuesto vigente: la versión `0` no se publica como versión real del catálogo. El profesor lo consideró
+  improbable, por lo que `0` se mantiene como estado inicial (base vacía, sin snapshot aplicado).
 - Los tests unitarios del modelo (issue #3) cubren cada regla sin Spring.
