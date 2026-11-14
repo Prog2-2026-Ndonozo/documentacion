@@ -23,7 +23,7 @@ infrastructure  ─────►  application  ─────►  domain
 - `domain/`: modelo y puertos. Solo `java.*` y Lombok. Cero Spring, JPA, Jakarta, Jackson.
 - `application/`: casos de uso (`@Component`), fachadas (`@Service`), excepciones. No conoce `infrastructure/`.
 - `infrastructure/`: REST, JPA, Kafka, Redis, cliente HTTP. Reemplazable sin tocar lo de adentro.
-- `config/` (fuera de `catalog/`): composition root; cablea clientes Redis, `WebClient`, seguridad.
+- `config/` (fuera de `catalog/`): composition root; cablea clientes Redis, `RestClient`, seguridad.
 
 Un solo módulo (`catalog`): sincronización y búsqueda comparten modelo y puerto de repositorio; partirlas
 obligaría a duplicar conceptos o a crear un `shared`. Si hiciera falta separarlas, el módulo es un
@@ -37,12 +37,14 @@ servicio-catalogo/
     ├── ServicioCatalogoSincronizacionApplication.java
     ├── catalog/
     │   ├── domain/                              ← PURO: sin Spring, sin JPA, sin Jakarta
-    │   │   ├── exception/                       ← error de validación del modelo (ADR-0016)
     │   │   ├── model/
     │   │   │   ├── Professional.java
     │   │   │   ├── ProfessionalCategory.java
     │   │   │   ├── WeeklySchedule.java
     │   │   │   └── CatalogVersion.java
+    │   │   ├── exception/                       ← error de validación del modelo (ADR-0016)
+    │   │   │   ├── InvalidCatalogDataException.java
+    │   │   │   └── CatedraUnavailableException.java   ← fallo al obtener el snapshot (ADR-0022)
     │   │   └── ports/
     │   │       ├── in/                          ← un puerto por caso de uso
     │   │       │   ├── SearchProfessionalsUseCase.java
@@ -54,7 +56,7 @@ servicio-catalogo/
     │   │           ├── CatedraSnapshotPort.java
     │   │           ├── CatedraCatalogReadPort.java
     │   │           └── SyncDiagnosticsPort.java
-    │   ├── application/                         ← Spring sí, infrastructure no
+    │   ├── application/                         ←Spring sí, infrastructure no
     │   │   ├── exception/
     │   │   │   └── ProfessionalNotFoundException.java
     │   │   ├── service/                         ← fachadas @Service, único entry point de drivers
@@ -67,9 +69,11 @@ servicio-catalogo/
     │   │       └── GetSyncStatusUseCaseImpl.java
     │   └── infrastructure/
     │       ├── persistence/                     ← PostgreSQL
-    │       │   ├── entity/                      CategoryEntity, ProfessionalEntity, WeeklyScheduleEntity
-    │       │   ├── repository/                  JpaCatalogRepository
-    │       │   ├── mapper/                      ProfessionalMapper, ...
+    │       │   ├── entity/                      ProfessionalCategoryEntity, ProfessionalEntity,
+    │       │   │                                WeeklyScheduleEntity, CatalogVersionEntity
+    │       │   ├── repository/                  JpaProfessionalCategoryRepository, JpaProfessionalRepository,
+    │       │   │                                JpaWeeklyScheduleRepository, JpaCatalogVersionRepository
+    │       │   ├── mapper/                      un mapper por concepto (dominio ↔ entidad)
     │       │   └── adapter/                     JpaCatalogRepositoryAdapter → CatalogRepositoryPort
     │       ├── catedrarest/                     ← GET /api/synchronization/snapshot
     │       │   ├── client/                      CatedraRestClient
@@ -92,11 +96,15 @@ servicio-catalogo/
         ├── SecurityConfig.java     (JWT: usuario final en REST propio, técnico inter-servicios y hacia cátedra)
         ├── KafkaConfig.java
         ├── RedisConfig.java
-        └── WebClientConfig.java
+        └── RestClientConfig.java, CatedraProperties.java
 ```
 
-Las carpetas se crean recién hasta el nivel que nombra una decisión. Las hojas (`entity/`, `repository/`,
-`mapper/`, `adapter/`, `client/`, `dto/`, `controller/`) nacen con el primer archivo de esa tecnología.
+Las carpetas se crean recién hasta el nivel que nombra una decisión. Las hojas
+(`entity/`, `repository/`, `mapper/`, `adapter/`, `client/`, `dto/`, `controller/`)
+nacen con el primer archivo de esa tecnología, en la issue que la toque.
+
+Las migraciones de Flyway no están en este árbol: viven en `src/main/resources/db/migration/`
+(`V1__crear_esquema_inicial.sql`).
 
 ## Las siete reglas, y quién las verifica
 
@@ -110,7 +118,7 @@ que cada regla **detecta** una violación real (los fixtures no son código de p
 | `DOMINIO_ES_PURO` | `domain/` → `application/`, `infrastructure/`, `config/`, Spring, Jakarta, Jackson |
 | `APLICACION_NO_CONOCE_INFRAESTRUCTURA` | `application/` → `infrastructure/`, `config/`, Spring Web/Data/Kafka, `jakarta.persistence`, Jackson |
 | `WEB_NO_VE_PERSISTENCIA_NI_PUERTOS_DE_SALIDA` | `infrastructure/web/` → `domain/ports/out/` o `infrastructure/persistence/` |
-| `PUERTOS_DE_ENTRADA_SOLO_SE_IMPLEMENTAN_EN_APLICACION` | implementar un puerto de entrada fuera de `application/` |
+| `PUERTOS_DE_ENTRADA_SOLO_SE_IMPLEMENTAN_EN_APLICACION` | implementar un puerto de entrada desde un lugar que no sea `application/` |
 | `SERVICE_SOLO_EN_LAS_FACHADAS` | `@Service` fuera de `application/service/` (los casos de uso son `@Component`) |
 | `SIN_INYECCION_POR_CAMPO` | `@Autowired` en un campo (siempre constructor) |
 
@@ -119,8 +127,9 @@ garantizan los fixtures.
 
 ## Puertos de entrada — quién los llama y con qué JWT
 
-Un driver externo (controller, listener de Kafka) **nunca** inyecta un puerto de entrada: entra por la fachada
-de `application/service/`.
+Un driver externo (controller, listener de Kafka) **nunca** inyecta un puerto de entrada:
+entra por la fachada de `application/service/`. Eso concentra en un lugar el `orElseThrow`
+de cada caso de uso y deja un único punto de entrada por responsabilidad.
 
 | Puerto in | Fachada | Adaptador in | Consumidor | JWT esperado |
 |---|---|---|---|---|
@@ -137,7 +146,7 @@ autentican los servicios entre sí (#10).
 
 ## Puertos de salida — a qué le hablan y quién los implementa
 
-| Puerto out | Adapter | Para qué |
+| Puerto out | Fachada del adapter | Para qué |
 |---|---|---|
 | `CatalogRepositoryPort` | `infrastructure/persistence/JpaCatalogRepositoryAdapter` | Persistencia propia de categorías, profesionales, horarios y versión local |
 | `CatedraSnapshotPort` | `infrastructure/catedrarest/CatedraSnapshotRestAdapter` | `GET /api/synchronization/snapshot` |
@@ -159,3 +168,8 @@ autentican los servicios entre sí (#10).
   `SyncResult(appliedVersion, categoriesCount, professionalsCount, schedulesCount)`.
 - **Drivers por la fachada:** `CatalogUpdatedListener` inyecta `CatalogSyncService`, nunca
   `ApplyIncrementalChangeUseCase`.
+- **Persistencia:** el esquema lo crea Flyway (ADR-0017) y las claves foráneas son diferidas (ADR-0018). La
+  transacción la abre el caso de uso, no el adaptador: `CatalogRepositoryPort` guarda por ID (insertar o
+  actualizar) y no valida referencias entre colecciones; de eso se encarga la base al confirmar. La versión local
+  vive en `catalog_version`, una tabla de una sola fila que arranca en `0` por migración; el adaptador la lee y
+  falla con un mensaje claro si no existe.

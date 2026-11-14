@@ -1,7 +1,6 @@
 # Decisiones de diseño
 
-Registro de decisiones (E §10 y §12). Numeración de ADR: `0002` está reservado para la propagación de identidad entre
-servicios (issue #10); los ADR del modelo de dominio usan el rango `0010+`. Cada decisión importante tiene su ADR en `adr/NNNN-titulo.md`
+Registro de decisiones (E §10 y §12). Cada decisión importante tiene su ADR en `adr/NNNN-titulo.md`
 (plantilla: `../../../ADR-template.md`). Esta tabla es el índice: se lee primero, el ADR solo si hace falta el detalle.
 
 ## Tomadas
