@@ -36,7 +36,10 @@ servicios (issue #10); los ADR del modelo de dominio usan el rango `0010+`. Cada
 | Estado observable de la sincronización | Tabla `sync_state` de una fila en PostgreSQL (`SIN_SINCRONIZAR`, `OK`, `RECONSTRUIDO_POR_DISCONTINUIDAD`, `ERROR`); la fachada lo escribe en una transacción propia y relanza el error | `adr/0032-estado-observable-de-la-sincronizacion.md` |
 | Un solo módulo hasta la entrega y desvíos conocidos | Se mantiene `catalog` hasta el 17/11; la migración a módulos se evalúa sobre el servicio funcionando; se registran los desvíos respecto de la skill | `adr/0033-un-solo-modulo-hasta-la-entrega-y-desvios-conocidos.md` |
 | Disponibilidad en el filtro de búsqueda | Parámetro `availableOn` (fecha): profesionales con un horario habilitado para el día de la semana de esa fecha; es un pre-filtro, no garantiza turnos libres. Supuesto a confirmar con la cátedra el 17/11 | `adr/0034-disponibilidad-en-el-filtro-de-busqueda.md` |
-| Consumidores de la búsqueda, login y filtro por nombre | KMP consume la búsqueda; turnos consume la agenda por profesional (no la búsqueda); registro y login en turnos; nombre = contiene, sin mayúsculas ni tildes, sobre nombre y apellido | `adr/0035-consumidores-de-la-busqueda-login-y-filtro-por-nombre.md` |
+| Consumidores de la búsqueda, login y filtro por nombre | KMP consume la búsqueda; turnos consume la agenda por profesional (no la búsqueda); registro y login en turnos; nombre = contiene, sin mayúsculas (las tildes no se ignoran por ahora), sobre nombre y apellido; sin paginación; endpoint de categorías | `adr/0035-consumidores-de-la-busqueda-login-y-filtro-por-nombre.md` |
+| CORS | No se configura. El cliente obligatorio es una app Android nativa, que no aplica CORS (es un mecanismo de navegadores). Sin orígenes permitidos (comportamiento por defecto de Spring); no se usa `allowedOrigins("*")`. Según el profesor (comunicación verbal, pendiente de confirmar por escrito), su mención en E §9 es un error del documento; el texto de E sigue incluyéndola | — |
+| Solo turnos consume el catálogo | KMP no consulta al catálogo (I §17): turnos expone la búsqueda a KMP y consulta a este servicio; el catálogo no valida tokens de usuario final. Reemplaza en parte a ADR-0035 | `adr/0036-solo-turnos-consume-el-catalogo.md` |
+| Autenticación entre servicios | JWT técnico de vida corta emitido por turnos y firmado con RS256 (par de claves: turnos firma, catálogo solo verifica); scope `catalog:read`; 401/403 en problem+json; Swagger solo en desarrollo | `adr/0037-jwt-tecnico-de-turnos-para-llamar-al-catalogo.md` |
 | Datos inválidos de la cátedra | Se asume que llegan válidos; sin manejo especial. Si llega uno inválido, falla la unidad de trabajo y la versión local no avanza | `adr/0014-validaciones-del-modelo.md` |
 | Versión 0 | No se publica (el profesor lo consideró improbable); `0` es el estado inicial, base vacía | `adr/0014-validaciones-del-modelo.md` |
 
@@ -45,8 +48,6 @@ servicios (issue #10); los ADR del modelo de dominio usan el rango `0010+`. Cada
 | Decisión | Bloquea | Notas |
 |---|---|---|
 | Idempotencia: deduplicar por `eventId` de Kafka (I §15.1, §18.1) | #6 | Falta decidir dónde se persiste el `eventId` procesado |
-| Ruta de KMP hacia la búsqueda: directo a catálogo o a través de turnos | #9, #10 | Ningún documento lo define; en análisis (ADR-0035) |
-| Autenticación entre servicios (JWT del usuario propagado o JWT técnico) | #10 | E §9 lo deja a cargo del alumno; con el login en turnos (ADR-0035), el catálogo debe validar tokens emitidos allí |
 | Reintentos y reconstrucción de la sincronización (qué hacer con filas ausentes del snapshot) | #6 | Alcance de la transacción resuelto en ADR-0023; falta la política de reintentos y la limpieza previa |
 | `SyncDiagnosticsPort`: tabla propia o sobre `CatalogRepositoryPort` | #7, #12 | Depende de la máquina de estados de sync |
 | Efecto de una categoría deshabilitada sobre sus profesionales en la búsqueda | #9 | El significado de "nombre" quedó en ADR-0035 y el de "disponibilidad" en ADR-0034 |
