@@ -7,31 +7,46 @@
 - Un issue de GitHub por milestone = una rama = un PR que lo cierra (`Closes #n`).
 - El checklist de cada issue es la guía interna de implementación (capas hexagonales), no son sub-issues.
 - Definición de terminado por issue: checklist resuelto; código en la capa correcta (skill y ArchUnit); al menos un test que
-  cubra el caso de uso; `./mvnw test` en verde; decisiones de diseño con su ADR; documentación al día.
+  cubra el caso de uso; `./mvnw test` en verde; decisiones de diseño con su ADR; documentación al día; y, desde que exista
+  el Compose, `docker compose up --build` sigue levantando el servicio.
 
 ## Punto de partida
-Un esqueleto de Spring Boot de septiembre (`Initial commit`): `Persona`, `HelloTest`, **H2 en el `pom.xml`** y nada más.
-Todo está por construir. Stack: ver `AGENTS.md`.
+**Se parte de cero.** El esqueleto de septiembre (`Initial commit`) no es una base de trabajo: trae una clase y un test de
+ejemplo y una dependencia de H2, que E §3 no admite como persistencia principal. T1 lo reemplaza. Del esqueleto solo se
+aprovecha lo de Maven (parent de Spring Boot 4.1.1, wrapper, plugin de compilación con Lombok). Stack: ver `AGENTS.md`.
+
+## Requisitos transversales
+Valen para todos los issues; un issue no se da por terminado si los rompe.
+- **PostgreSQL propio y exclusivo.** H2, SQLite y otras bases embebidas o en memoria están prohibidas como persistencia
+  principal (E §3). Las pruebas contra base usan Testcontainers.
+- **Dockerizado (E §3):** el servicio y su base se levantan con `docker compose up --build`, y el servicio sigue pudiendo
+  correr desde el IDE. Se asume la lectura estricta del enunciado y se confirma con la cátedra el 17/11 si alcanza con
+  levantar solo las bases (`DECISIONES.md`).
+- **Secretos fuera del repositorio y de la imagen:** `.env`, claves privadas y la cuenta técnica de la cátedra.
+- **Ningún acceso a la base del catálogo ni réplica de su contenido** (E §3, E §4.2).
 
 ## Objetivo para la reunión del 17/11
-Login de usuario final con JWT, endpoints protegidos y **una llamada real al catálogo** con el JWT técnico (búsqueda y
-categorías), con la base en PostgreSQL. Eso es T1, T2, T3, T4 y T5.
+En la reunión se muestra el **catálogo funcionando**. De este servicio alcanza con haberlo **empezado** (T1: base en
+PostgreSQL, módulos y reglas de ArchUnit). T2 a T5 (login con JWT, endpoints protegidos y una llamada real al catálogo con el
+JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizando hacerlo bien.
 
 ---
 
 ## Milestone 1 — Base del servicio y usuarios
 
 ### T1 chore: base del servicio `[chore]`
-- [ ] Sacar el esqueleto (`Persona`, `HelloTest`) y **H2**; agregar PostgreSQL, Flyway, Lombok, springdoc, ArchUnit, Testcontainers
-- [ ] `docker-compose.yml` con la base propia de este servicio y `.env` / `.env.example` (el `.env` está gitignoreado)
-- [ ] Estructura hexagonal y reglas de ArchUnit (partir de `ArchitectureRules` del catálogo)
-- [ ] ADR: motor de base de datos y organización en módulos
+- [x] Sacar el esqueleto (`Persona`, `HelloTest`) y **H2**; agregar PostgreSQL, Flyway, Lombok, springdoc, ArchUnit, Testcontainers
+- [x] `docker-compose.yml` con la base propia de este servicio y `.env` / `.env.example` (el `.env` está gitignoreado)
+- [x] `Dockerfile` de dos etapas (JDK 25 para compilar, JRE 25 para ejecutar) y el servicio en el Compose, sin secretos en la imagen (requisito transversal; E §3). No bloquea el hito del 17/11
+- [x] Estructura hexagonal y reglas de ArchUnit (partir de `ArchitectureRules` del catálogo): adaptar `MODULO_SOLO_TIENE_TRES_CAPAS`, descartar las dos reglas de la cátedra, sumar la regla entre módulos, la de los pares permitidos del grafo, la de ausencia de ciclos (`slices()` sin `config/`) y la de `professional` sin persistencia, cada una con su fixture que viola y otro que respeta (ADR-0002)
+- [x] Sin carpetas de módulos vacías: nacen con su primer archivo (`user` en T2, `professional` en T4)
+- [x] ADR-0001 (PostgreSQL y Flyway) y ADR-0002 (cuatro módulos y reglas entre ellos): aceptados
 
 ### T2 feat: registro y login del usuario final `[feature]` (E §3.2, E §5.1, E §9)
-- [ ] Modelo de usuario compatible con JHipster: `login`, `password`, `firstName`, `lastName`, `email`, `imageUrl`, `langKey`
-- [ ] Registro: queda activo sin verificar el correo; identificadores, estado y autoridades los administra el backend
-- [ ] Contraseña con hash adecuado (nunca en texto plano, ni en respuestas ni en logs)
-- [ ] Login que devuelve un JWT; ADR del contrato (rutas y validaciones: ver gap en `DECISIONES.md`)
+- [x] Modelo de usuario compatible con JHipster: `login`, `password`, `firstName`, `lastName`, `email`, `imageUrl`, `langKey`
+- [x] Registro: queda activo sin verificar el correo; identificadores, estado y autoridades los administra el backend
+- [x] Contraseña con hash adecuado (nunca en texto plano, ni en respuestas ni en logs)
+- [x] Login que devuelve un JWT; ADR del contrato (rutas y validaciones: ver gap en `DECISIONES.md`)
 
 ### T3 feat: seguridad con JWT de usuario `[security]` (E §9)
 - [ ] Servidor de recursos: validar firma y vigencia del JWT del usuario en los endpoints protegidos
@@ -39,6 +54,9 @@ categorías), con la base en PostgreSQL. Eso es T1, T2, T3, T4 y T5.
 - [ ] Tests con el decodificador real (token válido, sin token, firma inválida, vencido)
 
 ## Milestone 2 — Integración con el catálogo y disponibilidad
+
+> Módulos de este milestone (ADR-0002): T4 y T5 son el módulo `professional` (sin persistencia); T6 es `availability` y
+> depende del puerto de entrada de la agenda de `professional`.
 
 ### T4 feat: cliente del catálogo con JWT técnico `[feature]` (ADR-0037 del catálogo)
 - [ ] Par de claves RS256 y emisor del token (`CatalogTokenIssuer`, ver el contrato del catálogo): reutilizar 5 min; ante `401`, emitir y reintentar una vez
@@ -57,6 +75,7 @@ categorías), con la base en PostgreSQL. Eso es T1, T2, T3, T4 y T5.
 ## Milestone 3 — Reserva (REST + Kafka)
 
 ### T7 feat: crear el hold y persistir el proceso `[feature]` (I §9)
+- [ ] Antes del hold, validar con un puerto de entrada de `availability` que el horario sea reservable con datos vigentes del catálogo (E §4.2, E §8; ADR-0002). Decidir cómo informa «no reservable» y «catálogo caído» (pendiente en `DECISIONES.md`)
 - [ ] Crear el hold con `externalPatientId` estable; persistir `holdId`, `reservationProcessId` y `expiresAt`, asociados al usuario
 - [ ] Traducir los errores de I §13.1 (`SLOT_ALREADY_HELD`, `INVALID_SLOT`, `PROFESSIONAL_DISABLED`...)
 - [ ] ADR: máquina de estados de la reserva
@@ -89,4 +108,5 @@ categorías), con la base en PostgreSQL. Eso es T1, T2, T3, T4 y T5.
 ### T14 docs: documentación obligatoria `[docs]` (E §12)
 - [ ] README reproducible; diagrama de arquitectura (app Android, los dos servicios, sus bases e integraciones con la cátedra)
 - [ ] Modelo de datos y propiedad; estrategia de sincronización con el catálogo; idempotencia; decisiones de seguridad
-- [ ] Contrato hacia KMP; checklist de evidencias mínimas (E §11); `docker compose` de los dos servicios
+- [ ] Contrato hacia KMP; checklist de evidencias mínimas (E §11)
+- [ ] `docker compose` de los dos servicios: cada repositorio con su Compose y una red externa compartida (`proyecto-net`) para llamarse por nombre
