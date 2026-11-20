@@ -49,9 +49,9 @@ JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizan
 - [x] Login que devuelve un JWT; ADR del contrato (rutas y validaciones: ver gap en `DECISIONES.md`)
 
 ### T3 feat: seguridad con JWT de usuario `[security]` (E §9)
-- [ ] Servidor de recursos: validar firma y vigencia del JWT del usuario en los endpoints protegidos
-- [ ] 401 y 403 como `application/problem+json` con `code` estable
-- [ ] Tests con el decodificador real (token válido, sin token, firma inválida, vencido)
+- [x] Servidor de recursos: validar firma y vigencia del JWT del usuario en los endpoints protegidos
+- [x] 401 y 403 como `application/problem+json` con `code` estable
+- [x] Tests con el decodificador real (token válido, sin token, firma inválida, vencido)
 
 ## Milestone 2 — Integración con el catálogo y disponibilidad
 
