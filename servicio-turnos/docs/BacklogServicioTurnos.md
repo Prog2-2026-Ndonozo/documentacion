@@ -59,9 +59,9 @@ JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizan
 > depende del puerto de entrada de la agenda de `professional`.
 
 ### T4 feat: cliente del catálogo con JWT técnico `[feature]` (ADR-0037 del catálogo)
-- [ ] Par de claves RS256 y emisor del token (`CatalogTokenIssuer`, ver el contrato del catálogo): reutilizar 5 min; ante `401`, emitir y reintentar una vez
-- [ ] Puerto de salida y adaptador `RestClient` con timeouts; traducir `401`, `403`, `404` y `5xx` a errores propios
-- [ ] Tests con un catálogo simulado (WireMock o similar) y contra el catálogo real a mano
+- [x] Par de claves RS256 y emisor del token (`CatalogTokenIssuer`, ver el contrato del catálogo): reutilizar 5 min; ante `401`, emitir y reintentar una vez
+- [x] Puerto de salida y adaptador `RestClient` con timeouts; traducir `401`, `403`, `404` y `5xx` a errores propios
+- [x] Tests con un catálogo simulado (WireMock o similar) y contra el catálogo real a mano
 
 ### T5 feat: búsqueda y categorías para KMP `[feature]` (E §4.1, ADR-0036 del catálogo)
 - [ ] `search` y `categories`: reenvían al catálogo y se protegen con el JWT del usuario

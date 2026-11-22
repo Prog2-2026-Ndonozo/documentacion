@@ -71,15 +71,14 @@ nunca el JWT de la cátedra. Las rutas son `/api/...` sin el prefijo `/api/inter
 - **Clave privada por archivo:** `CATALOGO_PRIVATE_KEY_FILE` apunta a un PEM en formato PKCS#8 (el que genera
   `openssl genpkey`) de RSA de al menos 2048 bits. La aplicación **no arranca** si falta, si no se puede leer o si no sirve,
   y el mensaje nunca incluye el contenido. En Docker el Compose monta el archivo de solo lectura.
-- **Configuración** (`app.catalog.*`): `CATALOGO_BASE_URL` (por defecto `http://localhost:8081`), `CATALOGO_CONNECT_TIMEOUT`,
+- **Configuración** (`app.catalog.*`): `CATALOGO_BASE_URL` (por defecto `http://localhost:8080`, el puerto por defecto del catálogo), `CATALOGO_CONNECT_TIMEOUT`,
   `CATALOGO_READ_TIMEOUT`, `CATALOGO_PRIVATE_KEY_FILE`; el emisor y la audiencia son `servicio-turnos` y
   `servicio-catalogo`.
 - **WireMock** (`wiremock-standalone` 3.13.1, solo para tests). Se comprobó que funciona con Spring Boot 4.1.1. Las claves de
   los tests se generan en memoria en cada ejecución: **nunca se versiona una clave privada**, ni siquiera de prueba (los
   repositorios rechazan o marcan los archivos con claves privadas).
 - **Prueba contra el catálogo real:** como todavía no hay endpoints (llegan en T5), hay un test opcional que solo corre si se
-  define `CATALOGO_REAL_URL`; un `./mvnw test` normal lo omite. El catálogo se levanta en el puerto 8081 (los dos servicios
-  usan 8080 por defecto) y turnos se ejecuta fuera de Docker. La red compartida entre los dos Compose es de T14.
+  define `CATALOGO_REAL_URL`; un `./mvnw test` normal lo omite. El catálogo conserva su puerto por defecto (8080): es un servicio terminado y no se le cambia nada. Turnos, que está en desarrollo, usa el **8081** (`SERVER_PORT`; en Docker, `APP_PORT`), así que ninguno pisa al otro. Para esta prueba turnos se ejecuta fuera de Docker. La red compartida entre los dos Compose es de T14.
 
 ## Justificación
 Un token único y compartido es la forma más simple de cumplir «reutilizar hasta unos 30 segundos antes de que venza», y el
