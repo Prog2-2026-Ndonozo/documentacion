@@ -64,8 +64,8 @@ JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizan
 - [x] Tests con un catálogo simulado (WireMock o similar) y contra el catálogo real a mano
 
 ### T5 feat: búsqueda y categorías para KMP `[feature]` (E §4.1, ADR-0036 del catálogo)
-- [ ] `search` y `categories`: reenvían al catálogo y se protegen con el JWT del usuario
-- [ ] Contrato REST hacia KMP documentado y probado en Swagger
+- [x] `search` y `categories`: reenvían al catálogo y se protegen con el JWT del usuario
+- [x] Contrato REST hacia KMP documentado y probado en Swagger
 
 ### T6 feat: disponibilidad `[feature]` (E §7, I §8, I §17)
 - [ ] Agenda de un profesional (catálogo) + ocupaciones de la cátedra → slots libres para un rango de fechas
