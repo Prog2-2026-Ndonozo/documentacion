@@ -75,10 +75,10 @@ JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizan
 ## Milestone 3 — Reserva (REST + Kafka)
 
 ### T7 feat: crear el hold y persistir el proceso `[feature]` (I §9)
-- [ ] Antes del hold, validar con un puerto de entrada de `availability` que el horario sea reservable con datos vigentes del catálogo (E §4.2, E §8; ADR-0002). Decidir cómo informa «no reservable» y «catálogo caído» (pendiente en `DECISIONES.md`)
-- [ ] Crear el hold con `externalPatientId` estable; persistir `holdId`, `reservationProcessId` y `expiresAt`, asociados al usuario
-- [ ] Traducir los errores de I §13.1 (`SLOT_ALREADY_HELD`, `INVALID_SLOT`, `PROFESSIONAL_DISABLED`...)
-- [ ] ADR: máquina de estados de la reserva
+- [x] Antes del hold, validar con un puerto de entrada de `availability` que el horario sea reservable con datos vigentes del catálogo (E §4.2, E §8; ADR-0002). Decidir cómo informa «no reservable» y «catálogo caído» (pendiente en `DECISIONES.md`)
+- [x] Crear el hold con `externalPatientId` estable; persistir `holdId`, `reservationProcessId` y `expiresAt`, asociados al usuario
+- [x] Traducir los errores de I §13.1 (`SLOT_ALREADY_HELD`, `INVALID_SLOT`, `PROFESSIONAL_DISABLED`...)
+- [x] ADR: máquina de estados de la reserva
 
 ### T8 feat: confirmar el hold y recibir el pedido de teléfono `[feature]` (I §10, I §15.4)
 - [ ] Confirmar por REST (`WAITING_FOR_PHONE`); consumir `AdditionalInformationRequested` y conservar su `eventId`
