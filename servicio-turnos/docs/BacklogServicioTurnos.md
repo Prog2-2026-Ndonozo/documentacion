@@ -68,9 +68,9 @@ JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizan
 - [x] Contrato REST hacia KMP documentado y probado en Swagger
 
 ### T6 feat: disponibilidad `[feature]` (E §7, I §8, I §17)
-- [ ] Agenda de un profesional (catálogo) + ocupaciones de la cátedra → slots libres para un rango de fechas
-- [ ] Usar solo horarios y profesionales con `enabled=true`; no cachear el catálogo como vigente (E §3, E §4.2)
-- [ ] Tests del cálculo de slots (bordes: sin horarios, slot parcial, ocupado y retenido)
+- [x] Agenda de un profesional (catálogo) + ocupaciones de la cátedra → slots libres para un rango de fechas
+- [x] Usar solo horarios y profesionales con `enabled=true`; no cachear el catálogo como vigente (E §3, E §4.2)
+- [x] Tests del cálculo de slots (bordes: sin horarios, slot parcial, ocupado y retenido)
 
 ## Milestone 3 — Reserva (REST + Kafka)
 
