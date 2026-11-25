@@ -128,9 +128,9 @@ riesgo que I §18.4 señala.
   `SLOT_ALREADY_HELD` aunque el hold sea suyo. Reconocer el hold propio queda fuera de T7.
 - **Limitación:** entre la validación y el hold otro usuario puede tomar el turno; lo resuelve la cátedra con `SLOT_ALREADY_HELD`
   o `SLOT_ALREADY_RESERVED`.
-- **Supuesto a confirmar con la cátedra:** que acepta `startTime` como `HH:mm` (es el formato de I §9).
+- **Confirmado el 2026-11-24 con la cátedra real:** acepta `startTime` como `HH:mm` (el formato de I §9).
 - Probar el hold a mano crea un hold real en la cátedra que bloquea el turno hasta su vencimiento.
 - El contrato hacia la app se publica en Swagger; el documento de contratos de E §12 se completa en T14.
 
 ## Pendiente
-- Probar el contrato a mano en Swagger con el catálogo y la cátedra reales (último ítem de T7).
+Ninguno. El contrato se probó a mano en Swagger con el catálogo y la cátedra reales el 2026-11-24 (14 casos).
