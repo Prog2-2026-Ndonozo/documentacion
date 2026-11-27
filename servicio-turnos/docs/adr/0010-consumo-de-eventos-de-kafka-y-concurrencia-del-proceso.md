@@ -73,8 +73,13 @@ la forma del listener del catálogo evita inventar convenciones distintas para e
 - **Limitación:** el backlog del topic llega con `earliest`; los eventos de procesos que no están en la base se descartan con `WARN`.
 - **Limitación:** los eventos de otros tipos se consumen y se descartan; no se vuelven a recibir cuando T9 los trate (T12 reconcilia).
 - **Limitación:** no se compara `occurredAt`; dos pedidos fuera de orden dejan el último procesado.
-- **Supuesto a confirmar con la cátedra real:** que el broker acepta el grupo de consumo compartido con el catálogo.
+- **Verificado con la cátedra real (2026-11-26):** el broker acepta el grupo de consumo compartido con el catálogo.
+- **Limitación:** el evento se aplica aunque el `expiresAt` local ya haya pasado (un proceso `HELD` vencido pasó a
+  `WAITING_FOR_PHONE`). Se confía en que la cátedra emite el pedido solo si el hold seguía vigente; T12 reconcilia las expiraciones.
 - La tabla `processed_event` crece con cada evento; la limpieza queda fuera de alcance, como en el catálogo.
 
-## Pendiente
-- Probar 8b a mano con la cátedra real (confirmar un hold y ver que el proceso guarda el `eventId`).
+## Verificación manual (2026-11-26)
+Con la cátedra real: el consumidor se unió al grupo, recibió la partición del topic de acciones y leyó desde `earliest`. Un hold
+confirmado por REST (profesional 203) quedó en `WAITING_FOR_PHONE` con el `phone_request_event_id` del evento y `version = 2`
+(confirmación REST y evento, cada uno una vez). Un proceso del backlog quedó con `version = 1` (solo el evento). Cada `eventId`
+quedó registrado una vez en `processed_event`.

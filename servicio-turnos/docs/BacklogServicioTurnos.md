@@ -81,12 +81,12 @@ JWT técnico) ya no tienen fecha propia: se hacen antes de la entrega, priorizan
 - [x] ADR: máquina de estados de la reserva
 
 ### T8 feat: confirmar el hold y recibir el pedido de teléfono `[feature]` (I §10, I §15.4)
-- [ ] Confirmar por REST (`WAITING_FOR_PHONE`); consumir `AdditionalInformationRequested` y conservar su `eventId`
-- [ ] Idempotencia por `eventId`, registrado en la misma transacción que el efecto
+- [x] Confirmar por REST (`WAITING_FOR_PHONE`); consumir `AdditionalInformationRequested` y conservar su `eventId`
+- [x] Idempotencia por `eventId`, registrado en la misma transacción que el efecto
 
 ### T9 feat: enviar el teléfono y procesar el resultado `[feature]` (I §15.5 a §15.9, E §7)
-- [ ] Publicar `AdditionalInformationSubmitted`; procesar confirmación, rechazo (reintentable), expiración e inválido
-- [ ] No retroceder un proceso en estado final; duplicados sin efecto
+- [x] Publicar `AdditionalInformationSubmitted`; procesar confirmación, rechazo (reintentable), expiración e inválido
+- [x] No retroceder un proceso en estado final; duplicados sin efecto
 
 ## Milestone 4 — Consulta, cancelación y robustez
 
